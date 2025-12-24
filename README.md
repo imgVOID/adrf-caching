@@ -6,9 +6,9 @@
 
 ## Overview
 
-`adrf-caching` provides a set of asynchronous mixins and serializer tools designed to seamlessly integrate **Django 5.0+ native async views** into existing Django REST Framework (DRF) projects. It also supports ADRF (Asynchronous DRF), enabling developers to build fully async REST APIs with minimal changes.
+`adrf-caching` provides a set of asynchronous mixins designed to seamlessly integrate **Django 5.0+ async caching** into existing Django REST Framework (DRF) projects. It supports ADRF (Asynchronous DRF), enabling developers to build fully async REST APIs with minimal changes.
 
-This package solves a key challenge: extending traditional DRF functionality with native async support while maintaining full compatibility with existing DRF and ADRF codebases.
+This package solves a key challenge: extending traditional DRF functionality with native async support while maintaining full compatibility with existing ADRF codebase.
 
 ---
 
@@ -16,8 +16,6 @@ This package solves a key challenge: extending traditional DRF functionality wit
 
 - 🔄 **Native async API support:** Write async views using Django 5.0+ `async def` with familiar DRF mixins.
 - 🔐 **Built-in async caching:** Integrated async cache support using Django 5.0+ cache API (`aget`, `aset`, `ahas_key`) to reduce redundant DB queries.
-- 🧩 **Async Serializer mixins:** Async-compatible `is_valid()` and `to_representation()` for serializers to support async validation and serialization pipelines.
-- 🤝 **Full compatibility:** Works smoothly with traditional DRF, ADRF, and Django 5 async class-based views.
 - ⚙️ **Easy to integrate:** Drop-in extensions for existing DRF views and serializers enabling async capabilities.
 
 ---
