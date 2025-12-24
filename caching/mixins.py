@@ -1,6 +1,6 @@
 from hashlib import md5
-from caching import mixins
-from caching.viewsets import GenericViewSet
+from adrf import mixins
+from adrf.viewsets import GenericViewSet
 from django.core.cache import cache
 from rest_framework import status
 from rest_framework.response import Response
@@ -132,6 +132,14 @@ class DestroyModelMixin(mixins.DestroyModelMixin):
         return response
 
 # --- ViewSets ---
+
+class CachedModelReadOnlyViewSet(
+    RetrieveModelMixin,
+    ListModelMixin, 
+    GenericViewSet
+):
+    pass
+
 
 class CachedModelViewSet(
     CreateModelMixin,
