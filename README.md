@@ -28,12 +28,6 @@ This package solves a key challenge: extending traditional DRF functionality wit
 3. Compatible with ADRF if you are already using or experimenting with official async DRF package.
 4. Modern async serializers simplify building fully async data pipelines with nested relations.
 
-## How to use drf-async-mixins?
-This library contains two main modules:
-
-- **`drf/`** — Mixins that can be used with the standard Django REST Framework (DRF) without installing `adrf`. These are basic mixins compatible with synchronous DRF. If you are working with a traditional synchronous DRF project, import mixins from the `drf` folder.
-- **`adrf/`** — Mixins and components designed specifically for asynchronous Django REST Framework (`adrf`). Includes caching and other enhancements tailored for async environments. For async projects using `adrf`, use mixins from the `adrf` folder, which provide additional features like caching.
-
 ## Example
 ```
 from drf-async-mixins.viewsets import CachedModelViewSet
