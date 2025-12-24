@@ -22,7 +22,7 @@ This package solves a key challenge: extending traditional DRF functionality wit
 
 ---
 
-## Why Use drf-async-mixins?
+## Why Use adrf-caching?
 1. Seamlessly extend DRF with async Django 5.0+ views. No need to rewrite your entire API.
 2. Leverage async caching to reduce redundant database queries and improve response consistency.
 3. Compatible with ADRF if you are already using or experimenting with official async DRF package.
@@ -30,7 +30,7 @@ This package solves a key challenge: extending traditional DRF functionality wit
 
 ## Example
 ```
-from drf-async-mixins.viewsets import CachedModelViewSet
+from caching.mixins import CachedModelViewSet
 
 class MyCachedModelViewSet(CachedModelViewSet):
     queryset = MyModel.objects.all()
