@@ -6,7 +6,7 @@
 
 ## Overview
 
-`drf-async-mixins` provides a set of asynchronous mixins and serializer tools designed to seamlessly integrate **Django 5.0+ native async views** into existing Django REST Framework (DRF) projects. It also supports ADRF (Asynchronous DRF), enabling developers to build fully async REST APIs with minimal changes.
+`adrf-caching` provides a set of asynchronous mixins and serializer tools designed to seamlessly integrate **Django 5.0+ native async views** into existing Django REST Framework (DRF) projects. It also supports ADRF (Asynchronous DRF), enabling developers to build fully async REST APIs with minimal changes.
 
 This package solves a key challenge: extending traditional DRF functionality with native async support while maintaining full compatibility with existing DRF and ADRF codebases.
 
