@@ -36,39 +36,17 @@ class CacheUtils:
     async def generate_list_key(request, is_personal=False):
         """Generates a cache key for list views, including versioning for personal data."""
         path_hash = md5(request.get_full_path().encode()).hexdigest()
-        if is_personal and request.user.is_authenticated:
+        if request.user.is_authenticated:
             version = await CacheUtils.get_user_version(request.user.id)
             user_hash = md5(str(request.user.id).encode()).hexdigest()
             return f"list:{path_hash}:{user_hash}:v{version}"
         return f"list:g:{path_hash}"
 
-
-class Owned:
-    """Mixin to filter querysets by the authenticated user."""
-    def get_queryset(self):
-        if self.request.user.is_authenticated:
-            model = self.serializer_class.Meta.model
-            if hasattr(model, 'client'):
-                return model.objects.filter(client__user=self.request.user)
-            elif hasattr(model, 'expert'):
-                return model.objects.filter(expert__user=self.request.user)
-            return model.objects.all()
-        return None
-    
-    async def aget_object(self):
-        obj = await super().aget_object()
-        for permission in self.get_permissions():
-            if hasattr(permission, "has_object_permission"):
-                if not permission.has_object_permission(self.request, self, obj):
-                    self.permission_denied(self.request)
-        return obj
-
 # --- Mixins ---
 
 class ListModelMixin(mixins.ListModelMixin):
     async def alist(self, request, *args, **kwargs):
-        is_personal = isinstance(self, Owned)
-        cache_key = await CacheUtils.generate_list_key(request, is_personal=is_personal)
+        cache_key = await CacheUtils.generate_list_key(request)
         if (cached := await cache.aget(cache_key)):
             return Response(cached, status=status.HTTP_200_OK)
         queryset = await self.afilter_queryset(self.get_queryset())
