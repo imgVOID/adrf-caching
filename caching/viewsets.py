@@ -1,6 +1,7 @@
 from adrf.viewsets import GenericViewSet
 from .mixins import *
 
+
 class ReadOnlyModelViewSetCached(
     RetrieveModelMixin,
     ListModelMixin, 
@@ -9,12 +10,11 @@ class ReadOnlyModelViewSetCached(
     """
     A viewset that provides default asynchronous `list()` and `retrieve()` actions. Cached.
     """
-    
     async def list(self, request, *args, **kwargs):
         return await self.alist(request, *args, **kwargs)
 
-    async def retrieve(self, request, *args, **kwargs):
-        return await self.aretrieve(request, *args, **kwargs)
+    async def retrieve(self, request, pk=None, *args, **kwargs):
+        return await self.aretrieve(request, pk=pk, *args, **kwargs)
 
 
 class ModelViewSetCached(
@@ -36,8 +36,8 @@ class ModelViewSetCached(
     async def create(self, request, *args, **kwargs):
         return await self.acreate(request, *args, **kwargs)
 
-    async def retrieve(self, request, *args, **kwargs):
-        return await self.aretrieve(request, *args, **kwargs)
+    async def retrieve(self, request, pk=None, *args, **kwargs):
+        return await self.aretrieve(request, pk=pk, *args, **kwargs)
 
     async def update(self, request, *args, **kwargs):
         return await self.aupdate(request, *args, **kwargs)
