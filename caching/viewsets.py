@@ -1,6 +1,6 @@
 from adrf.viewsets import GenericViewSet
 
-from mixins import *
+from .mixins import *
 
 
 class ReadOnlyModelViewSetCached(
