@@ -9,12 +9,14 @@ A high-performance library that extends **ADRF (Asynchronous Django REST Framewo
 * **Smart Invalidation (Cache Versioning):** Instead of manually clearing complex cache keys, it uses a versioning system. When a user modifies data, their specific version increments, instantly invalidating outdated lists.
 * **Secure Data Isolation:** Prevents data leakage by incorporating unique user hashes and versions into cache keys.
 * **MD5 Hashing:** Optimized performance using MD5 for compact and consistent cache keys.
+* **drf-spectacular support:** Fully compatible with OpenAPI 3.0 schema generation. It includes built-in method bridging to ensure async actions are correctly indexed by the schema inspector.
 
 ## 🛠 Prerequisites
 
 * **Python:** 3.10+
 * **Django:** 4.2+ (with an async-capable cache backend)
 * **ADRF:** [Asynchronous Django REST Framework](https://github.com/em1208/adrf)
+* **drf-spectacular** (Optional): [OpenAPI 3.0 schema generation for DRF](https://github.com/tfranzel/drf-spectacular)
 
 ## 📖 Usage Guide
 
@@ -66,6 +68,36 @@ class ProfileViewSet(ListModelMixin, RetrieveModelMixin, GenericViewSet):
     serializer_class = ProfileSerializer
 ```
 
+### 📜 OpenAPI Schema & Documentation
+
+##### The library is optimized for **[drf-spectacular](https://github.com/tfranzel/drf-spectacular)**.
+
+When using `ViewSets`, we recommend explicit method mapping in `urls.py`. This helps the schema inspector distinguish between different actions (like `list` and `retrieve`) and prevents collisions.
+
+```python
+from django.urls import path
+from . import views
+
+urlpatterns = [
+    # Explicit mapping for ViewSets ensures clean OpenAPI IDs
+    path("items/", views.ItemViewSet.as_view({'get': 'list', 'post': 'create'})),
+    path("items/<int:pk>/", views.ItemViewSet.as_view({'get': 'retrieve', 'put': 'update'})),
+]
+```
+Even though the library uses async methods internally (e.g., alist, acreate), you should use standard DRF action names as keys in your schema decorators. Our base classes bridge these names automatically to provide a seamless documentation experience.
+
+```python
+from drf_spectacular.utils import extend_schema, extend_schema_view
+
+@extend_schema_view(
+    list=extend_schema(summary="List all items"),
+    retrieve=extend_schema(summary="Get item details"),
+)
+class ItemViewSet(ModelViewSetCached):
+    queryset = Item.objects.all()
+    serializer_class = ItemSerializer
+```
+
 ### Extra
 To ensure correct object caching after creation or updates, the library looks for the id field by default. If your model uses a different primary key (e.g., uuid or slug or one to one relation), you must specify it in the serializer using the 'custom_id' attribute:
 ```python
@@ -80,4 +112,4 @@ class MySerializer(serializers.ModelSerializer):
 ## License
 Apache 2.0 License
 
-django async, drf async, adrf, django 5 async views, async serializers, async caching, drf caching, asynchronous drf, adrf, django rest framework, python async api
+django async, drf async, adrf, django 5 async views, async serializers, async caching, drf caching, asynchronous drf, adrf, django rest framework, python async api, drf-spectacular, OpenAPI 3.0, Swagger, Redoc, async api documentation, schema generation, adrf-spectacular
