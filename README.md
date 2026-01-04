@@ -8,8 +8,8 @@ A high-performance library that extends **ADRF (Asynchronous Django REST Framewo
 * **Automatic Async Caching:** Seamlessly caches results to your configured cache backend (e.g., Redis) using Django Async Caching.
 * **Smart Invalidation (Cache Versioning):** Instead of manually clearing complex cache keys, it uses a versioning system. When a user modifies data, their specific version increments, instantly invalidating outdated lists.
 * **Secure Data Isolation:** Prevents data leakage by incorporating unique user hashes and versions into cache keys.
-* **MD5 Hashing:** Optimized performance using MD5 for compact and consistent cache keys.
-* **drf-spectacular support:** Fully compatible with OpenAPI 3.0 schema generation. It includes built-in method bridging to ensure async actions are correctly indexed by the schema inspector.
+* **MD5 Hashing:** Optimized performance using `md5` for compact and consistent cache keys.
+* **OpenAPI Support:** Fully compatible with `drf-spectacular` scheme generator. It includes built-in method bridging to ensure async actions are correctly indexed by the schema inspector.
 
 ## 🛠 Prerequisites
 
@@ -72,7 +72,16 @@ class ProfileViewSet(ListModelMixin, RetrieveModelMixin, GenericViewSet):
 
 ##### The library is optimized for **[drf-spectacular](https://github.com/tfranzel/drf-spectacular)**.
 
-When using `ViewSets`, we recommend explicit method mapping in `urls.py`. This helps the schema inspector distinguish between different actions (like `list` and `retrieve`) and prevents collisions.
+Since `drf-spectacular` and many other libs expects standard DRF action names, we use a preprocessing hook to map async methods (like alist, aretrieve) back to their standard counterparts during schema generation. This ensures that features like pagination, filters, and correct response types are automatically detected.
+
+```python
+SPECTACULAR_SETTINGS = {
+    'PREPROCESSING_HOOKS': [
+        'caching.utils.preprocess_async_actions',
+    ]
+}
+```
+When using `ViewSets`, explicit method mapping in `urls.py` recommended. This helps the schema inspector distinguish between different actions (like `list` and `retrieve`) and prevents collisions.
 
 ```python
 from django.urls import path
@@ -80,11 +89,12 @@ from . import views
 
 urlpatterns = [
     # Explicit mapping for ViewSets ensures clean OpenAPI IDs
-    path("items/", views.ItemViewSet.as_view({'get': 'list', 'post': 'create'})),
-    path("items/<int:pk>/", views.ItemViewSet.as_view({'get': 'retrieve', 'put': 'update'})),
+    path("items/", views.ItemViewSet.as_view({'get': 'alist', 'post': 'acreate'})),
+    path("items/<int:pk>/", views.ItemViewSet.as_view({'get': 'aretrieve', 'put': 'aupdate'})),
 ]
 ```
-Even though the library uses async methods internally (e.g., alist, acreate), you should use standard DRF action names as keys in your schema decorators. Our base classes bridge these names automatically to provide a seamless documentation experience.
+
+Even though the library uses async methods internally (e.g., alist, acreate), you should use standard DRF action names as keys in your schema decorators. The base classes bridge these names automatically to provide a seamless documentation experience.
 
 ```python
 from drf_spectacular.utils import extend_schema, extend_schema_view
