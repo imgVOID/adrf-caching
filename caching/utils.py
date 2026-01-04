@@ -36,3 +36,27 @@ class CacheUtils:
             user_hash = md5(str(request.user.id).encode()).hexdigest()
             return f"list:{path_hash}:{user_hash}:v{version}"
         return f"list:g:{path_hash}"
+
+
+def preprocess_async_actions(endpoints, **kwargs):
+    """
+    Preprocessing hook for drf-spectacular using Python 3.10+ match statement.
+    """
+    for (path, path_regex, method, callback) in endpoints:
+        if hasattr(callback, 'actions'):
+            actions = callback.actions
+            for http_method, action in actions.items():
+                match action:
+                    case 'alist':
+                        actions[http_method] = 'list'
+                    case 'aretrieve':
+                        actions[http_method] = 'retrieve'
+                    case 'acreate':
+                        actions[http_method] = 'create'
+                    case 'aupdate':
+                        actions[http_method] = 'update'
+                    case 'partial_aupdate':
+                        actions[http_method] = 'partial_update'
+                    case 'adestroy':
+                        actions[http_method] = 'destroy'
+    return endpoints
