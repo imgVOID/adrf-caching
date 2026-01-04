@@ -14,7 +14,7 @@ A high-performance library that extends **ADRF (Asynchronous Django REST Framewo
 
 * **Python:** 3.10+
 * **Django:** 4.2+ (with an async-capable cache backend)
-* **ADRF:** [Asynchronous Django REST Framework](https://github.com/vbabiy/adrf)
+* **ADRF:** [Asynchronous Django REST Framework](https://github.com/em1208/adrf)
 
 ## 📖 Usage Guide
 
