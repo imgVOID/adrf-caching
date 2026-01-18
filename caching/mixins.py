@@ -1,6 +1,7 @@
 from adrf import mixins
 from rest_framework import status
 from rest_framework.response import Response
+from asgiref.sync import sync_to_async
 
 from .utils import cache, CacheUtils
 
@@ -11,7 +12,7 @@ class CreateModelMixin(mixins.CreateModelMixin):
     """
     async def acreate(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
-        await serializer.ais_valid(raise_exception=True)
+        await sync_to_async(serializer.is_valid, thread_sensitive=True)(raise_exception=True)
         await self.perform_acreate(serializer)
         data = await serializer.adata
         m_hash = await CacheUtils.get_model_hash(self)
