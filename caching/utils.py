@@ -1,4 +1,5 @@
 from hashlib import md5
+from json import dumps
 from django.core.cache import cache
 
 
@@ -27,15 +28,21 @@ class CacheUtils:
         except (ValueError, TypeError):
             await cache.aset(f"u_ver:{user_id}", 2, timeout=None)
 
-    @staticmethod
-    async def generate_list_key(request, is_personal=False):
-        """Generates a cache key for list views, including versioning for personal data."""
-        path_hash = md5(request.get_full_path().encode()).hexdigest()
-        if request.user.is_authenticated:
-            version = await CacheUtils.get_user_version(request.user.id)
-            user_hash = md5(str(request.user.id).encode()).hexdigest()
-            return f"list:{path_hash}:{user_hash}:v{version}"
-        return f"list:g:{path_hash}"
+    @classmethod
+    async def generate_list_key(cls, request):
+        """
+        Generates a stable, sorted cache key for list views.
+        """
+        view = request.parser_context.get('view')
+        model_hash = await cls.get_model_hash(view)
+        query_params = dict(request.query_params.items())
+        sorted_params = sorted(query_params.items())
+        params_hash = md5(dumps(sorted_params).encode()).hexdigest()
+        user_id = request.user.id if request.user.is_authenticated else "anonymous"
+        version = "v0"
+        if user_id != "anonymous":
+            version = f"v{await cls.get_user_version(user_id)}"
+        return f"list:{model_hash}:{params_hash}:{version}"
 
 
 def preprocess_async_actions(endpoints, **kwargs):
