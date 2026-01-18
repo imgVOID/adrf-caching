@@ -59,7 +59,7 @@ If you already have a class based on adrf.generics.GenericAPIView, you can injec
 
 ```python
 from adrf.viewsets import GenericViewSet
-from caching.mixins import ListModelMixin, RetrieveModelMixin
+from adrf_caching.mixins import ListModelMixin, RetrieveModelMixin
 from .models import Profile
 from .serializers import ProfileSerializer
 
@@ -77,7 +77,7 @@ Since `drf-spectacular` and many other libs expects standard DRF action names, w
 ```python
 SPECTACULAR_SETTINGS = {
     'PREPROCESSING_HOOKS': [
-        'caching.utils.preprocess_async_actions',
+        'adrf_caching.utils.preprocess_async_actions',
     ]
 }
 ```
@@ -108,7 +108,7 @@ class ItemViewSet(ModelViewSetCached):
     serializer_class = ItemSerializer
 ```
 
-### Extra
+#### Extra
 To ensure correct object caching after creation or updates, the library looks for the id field by default. If your model uses a different primary key (e.g., uuid or slug or one to one relation), you must specify it in the serializer using the 'custom_id' attribute:
 ```python
 class MySerializer(serializers.ModelSerializer):
@@ -117,6 +117,27 @@ class MySerializer(serializers.ModelSerializer):
     class Meta:
         model = MyModel
         fields = "__all__"
+```
+### 🏃 Running Tests
+
+The library uses Django's `TransactionTestCase` to ensure database integrity during async operations.
+```
+# Run all tests
+python -m unittest discover tests -p "*_test.py"
+
+# Run a specific test file
+python -m unittest tests/viewsets_test.py
+
+# Run a specific test class
+python -m unittest tests.viewsets_test.TestCacheSystem
+```
+You can use the standard Django test runner:
+```
+# Run all tests
+python manage.py test tests.utils_test tests.viewsets_test tests.generics_test
+
+# Run a specific test class
+python manage.py test tests.viewsets_test.TestCacheSystem
 ```
 
 ## License
