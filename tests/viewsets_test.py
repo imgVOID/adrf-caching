@@ -3,7 +3,6 @@ from django.test import TransactionTestCase
 from django.contrib.auth.models import User
 from django.core.cache import cache
 from rest_framework.test import APIRequestFactory, force_authenticate
-from unittest.mock import AsyncMock, MagicMock
 from rest_framework import status
 from adrf.serializers import ModelSerializer as AsyncModelSerializer
 
@@ -17,6 +16,16 @@ class UserSerializer(AsyncModelSerializer):
         fields = ['id', 'username']
 
 
+class UserReadOnlyViewSet(ReadOnlyModelViewSetCached):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+
+
+class UserFullViewSet(ModelViewSetCached):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+
+
 class TestViewSetIntegration(TransactionTestCase):
     def setUp(self):
         self.factory = APIRequestFactory()
@@ -28,10 +37,6 @@ class TestViewSetIntegration(TransactionTestCase):
 
     async def test_readonly_list_integration_no_mocks(self):
         """Verify ReadOnlyModelViewSetCached.list calls alist and caches without any mocks."""
-        
-        class UserReadOnlyViewSet(ReadOnlyModelViewSetCached):
-            queryset = User.objects.all()
-            serializer_class = UserSerializer
 
         # 1. Setup real request
         request = self.factory.get(self.path)
@@ -55,10 +60,6 @@ class TestViewSetIntegration(TransactionTestCase):
 
     async def test_model_viewset_full_cycle_no_mocks(self):
         """Verify ModelViewSetCached.partial_update updates real cache."""
-        
-        class UserFullViewSet(ModelViewSetCached):
-            queryset = User.objects.all()
-            serializer_class = UserSerializer
 
         # Create a user to update
         target_user = await User.objects.acreate(username="original_name")
