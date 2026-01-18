@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "adrf-caching"
+version = "0.1.0"
+authors = [
+  { name="imgvoid", email="imgvoid@gmail.com" },
+]
+description = "Async caching with MD5 and OpenAPI schema generation for ADRF (Asynchronous Django Rest Framework) and Django 5.0+"
+readme = "README.md"
+requires-python = ">=3.10"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
+    "Framework :: Django",
+    "Intended Audience :: Developers",
+]
+dependencies = [
+    "Django>=5.0",
+    "djangorestframework>=3.14",
+    "asgiref>=3.5",
+    "adrf",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/imgVOID/adrf-caching"
+"Bug Tracker" = "https://github.com/imgVOID/adrf-caching/issues"
