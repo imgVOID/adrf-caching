@@ -18,6 +18,12 @@ A high-performance library that extends **ADRF (Asynchronous Django REST Framewo
 * **ADRF:** [Asynchronous Django REST Framework](https://github.com/em1208/adrf)
 * **drf-spectacular** (Optional): [OpenAPI 3.0 schema generation for DRF](https://github.com/tfranzel/drf-spectacular)
 
+
+## ⚙️ Installation
+```
+pip install adrf-caching
+```
+
 ## 📖 Usage Guide
 
 This library provides three levels of integration: **Generics** (pre-built views), **ViewSets** (ready-to-use CRUD classes), and **Mixins** (for custom logic).
