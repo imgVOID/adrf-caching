@@ -5,7 +5,7 @@ from unittest.mock import MagicMock
 from django.test import TransactionTestCase
 from django.core.cache import cache
 
-from caching.utils import CacheUtils
+from adrf_caching.utils import CacheUtils
 
 
 class TestCacheUtilsUnit(TransactionTestCase):

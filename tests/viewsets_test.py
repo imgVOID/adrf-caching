@@ -6,8 +6,8 @@ from rest_framework.test import APIRequestFactory, force_authenticate
 from rest_framework import status
 from adrf.serializers import ModelSerializer as AsyncModelSerializer
 
-from caching.utils import CacheUtils
-from caching.viewsets import ModelViewSetCached, ReadOnlyModelViewSetCached
+from adrf_caching.utils import CacheUtils
+from adrf_caching.viewsets import ModelViewSetCached, ReadOnlyModelViewSetCached
 
 
 class UserSerializer(AsyncModelSerializer):

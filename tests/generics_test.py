@@ -8,11 +8,11 @@ from rest_framework.test import APIClient
 from rest_framework.parsers import JSONParser
 from adrf.serializers import ModelSerializer as AsyncModelSerializer
 
-from caching.generics import (
+from adrf_caching.generics import (
     ListCreateAPIView, RetrieveUpdateDestroyAPIView, 
     RetrieveUpdateAPIView, ListAPIView
 )
-from caching.utils import CacheUtils
+from adrf_caching.utils import CacheUtils
 
 
 class UserSerializer(AsyncModelSerializer):

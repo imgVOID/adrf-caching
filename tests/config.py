@@ -2,7 +2,6 @@ import django
 from django.conf import settings
 from django.core.management import call_command
 
-# Обов'язково для ROOT_URLCONF
 urlpatterns = []
 
 def setup_django():
@@ -21,7 +20,7 @@ def setup_django():
                 "django.contrib.sessions",
                 "rest_framework",
                 "adrf",
-                "caching",
+                "adrf_caching",
             ],
             CACHES={
                 "default": {

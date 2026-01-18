@@ -11,11 +11,11 @@ from rest_framework.exceptions import ValidationError
 from adrf.viewsets import GenericViewSet
 from adrf.serializers import ModelSerializer as AsyncModelSerializer
 
-from caching.mixins import (
+from adrf_caching.mixins import (
     CreateModelMixin, ListModelMixin, RetrieveModelMixin, 
     UpdateModelMixin, DestroyModelMixin
 )
-from caching.utils import CacheUtils
+from adrf_caching.utils import CacheUtils
 
 # --- Mock Components ---
 
