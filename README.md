@@ -29,10 +29,10 @@ pip install adrf-caching
 This library provides three levels of integration: **Generics** (pre-built views), **ViewSets** (ready-to-use CRUD classes), and **Mixins** (for custom logic).
 
 ### 1. Using Cached ViewSets (Recommended for CRUD)
-The easiest way to implement full CRUD with caching is to inherit from our cached ViewSet classes. These classes bridge ADRF's async capabilities with our caching logic.
+The easiest way to implement full CRUD with caching is to inherit from the cached ViewSet classes. These classes bridge ADRF's async capabilities with the caching logic.
 
 ```python
-from your_app.viewsets import ModelViewSetCached, ReadOnlyModelViewSetCached
+from adrf_caching.viewsets import ModelViewSetCached, ReadOnlyModelViewSetCached
 from .models import Post
 from .serializers import PostSerializer
 
@@ -48,10 +48,10 @@ class PostReadOnlyViewSet(ReadOnlyModelViewSetCached):
 ```
 
 ### 2. Using Concrete Generics (Fastest)
-The simplest way is to inherit from pre-built generic views in `generics.py`. These already include both ADRF's async logic and our caching mixins.
+The simplest way is to inherit from pre-built generic views in `generics.py`. These already include both ADRF's async logic and the caching mixins.
 
 ```python
-from your_app.generics import ListCreateAPIView
+from adrf_caching.generics import ListCreateAPIView
 from .models import Book
 from .serializers import BookSerializer
 
@@ -61,7 +61,7 @@ class BookListCreateView(ListCreateAPIView):
 ```
 
 ### 3. Adding Mixins to Existing ADRF Classes (Flexible)
-If you already have a class based on adrf.generics.GenericAPIView, you can inject our caching logic by placing our mixins before any other classes in the inheritance chain.
+If you already have a class based on adrf.generics.GenericAPIView, you can inject the caching logic by placing the mixins before any other classes in the inheritance chain.
 
 ```python
 from adrf.viewsets import GenericViewSet
