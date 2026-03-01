@@ -50,13 +50,12 @@ class RetrieveModelMixin(mixins.RetrieveModelMixin):
     """
     Retrieve and cache a model instance.
     """
-
     async def aretrieve(self, request, *args, **kwargs):
+        instance = await self.aget_object()
         m_hash = await CacheUtils.get_model_hash(self)
-        cache_key = f"obj:{m_hash}:{self.kwargs['pk']}"
+        cache_key = f"obj:{m_hash}:{instance.pk}"
         if (cached := await cache.aget(cache_key)):
             return Response(cached, status=status.HTTP_200_OK)
-        instance = await self.aget_object()
         serializer = self.get_serializer(instance)
         data = await serializer.adata
         await cache.aset(cache_key, data, timeout=600)
