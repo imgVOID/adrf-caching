@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "adrf-caching"
-version = "0.1.2"
+version = "0.1.3"
 authors = [
   { name="imgvoid", email="imgvoid@gmail.com" },
 ]
@@ -22,7 +22,7 @@ dependencies = [
     "Django>=5.0",
     "djangorestframework>=3.14",
     "asgiref>=3.5",
-    "adrf",
+    "adrf>=0.1.12",
 ]
 
 [project.urls]

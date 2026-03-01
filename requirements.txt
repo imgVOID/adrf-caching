@@ -1,4 +1,4 @@
 Django>=5.0
 djangorestframework>=3.14
 asgiref>=3.5
-adrf
+adrf>=0.1.12

@@ -78,23 +78,26 @@ class ProfileViewSet(ListModelMixin, RetrieveModelMixin, GenericViewSet):
 
 ##### The library is optimized for **[drf-spectacular](https://github.com/tfranzel/drf-spectacular)**.
 
-Since `drf-spectacular` and many other libs expects standard DRF action names, we use a preprocessing hook to map async methods (like alist, aretrieve) back to their standard counterparts during schema generation. This ensures that features like pagination, filters, and correct response types are automatically detected.
+Since `drf-spectacular` and many other libs expects standard DRF action names, we need to directly map async methods (like alist, aretrieve) back to their standard counterparts during schema generation. This ensures that features like pagination, filters, and correct response types are automatically detected.
 
 ```python
-SPECTACULAR_SETTINGS = {
-    'PREPROCESSING_HOOKS': [
-        'adrf_caching.utils.preprocess_async_actions',
-    ]
-}
+class CustomReadOnlyViewSet(ReadOnlyModelViewSetCached):
+    queryset = Test.objects.all()
+
+    @extend_schema(summary="retrieve by id", description="retrieve")
+    async def aretrieve(self, request, *args, **kwargs):
+        return await super().aretrieve(request, *args, **kwargs)
 ```
-When using `ViewSets`, explicit method mapping in `urls.py` recommended. This helps the schema inspector distinguish between different actions (like `list` and `retrieve`) and prevents collisions.
+
+You can use explicit method mapping in `urls.py` or the adrf async router. This helps the schema inspector distinguish between different actions (like `list` and `alist`, `retrieve` and `aretrieve`) and prevents collisions.
 
 ```python
 from django.urls import path
 from . import views
 
 urlpatterns = [
-    # Explicit mapping for ViewSets ensures clean OpenAPI IDs
+    # Explicit mapping for ViewSets ensures clean async OpenAPI
+    # Or you can use adrf.routers.DefaultRouter
     path("items/", views.ItemViewSet.as_view({'get': 'alist', 'post': 'acreate'})),
     path("items/<int:pk>/", views.ItemViewSet.as_view({'get': 'aretrieve', 'put': 'aupdate'})),
 ]
