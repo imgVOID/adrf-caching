@@ -74,6 +74,20 @@ class ProfileViewSet(ListModelMixin, RetrieveModelMixin, GenericViewSet):
     serializer_class = ProfileSerializer
 ```
 
+### 4. Changing TTL and prefix
+The library works out-of-the-box with sensible defaults, but you can customize its behavior by adding the `ADRF_CACHING_SETTINGS` dictionary to your Django `settings.py`. 
+The settings include built-in validation: providing a non-integer value for TTL settings will raise an `ImproperlyConfigured` error during startup to prevent runtime failures.
+
+```python
+# settings.py
+ADRF_CACHING_SETTINGS = {
+    "TTL_OBJECT": 600,             # Cache duration for single objects (seconds)
+    "TTL_LIST": 300,               # Cache duration for lists (seconds)
+    "TTL_USER_VER": 86400,         # How long the user's version key lives
+    "PREFIX": "adrf_caching",      # Global prefix for all cache keys
+}
+```
+
 ### 📜 OpenAPI Schema & Documentation
 
 ##### The library is optimized for **[drf-spectacular](https://github.com/tfranzel/drf-spectacular)**.

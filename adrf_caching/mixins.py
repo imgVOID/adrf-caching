@@ -3,12 +3,13 @@ from rest_framework import status
 from rest_framework.response import Response
 from asgiref.sync import sync_to_async
 
-from .utils import cache, CacheUtils
+from .utils import cache, CacheUtils, lib_settings
 
 
 class CreateModelMixin(mixins.CreateModelMixin):
     """
     Create and cache a model instance.
+    Invalidates user list version.
     """
     async def acreate(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -19,7 +20,10 @@ class CreateModelMixin(mixins.CreateModelMixin):
         id_field = getattr(self.serializer_class, "custom_id", "id")
         obj_pk = data.get(id_field)
         if obj_pk:
-            await cache.aset(f"obj:{m_hash}:{obj_pk}", data, timeout=600)
+            await cache.aset(
+                f"{lib_settings.PREFIX}:obj:{m_hash}:{obj_pk}", 
+                data, timeout=lib_settings.TTL_OBJECT
+            )
         if request.user.is_authenticated:
             await CacheUtils.incr_user_version(request.user.id)
         return Response(data, status=status.HTTP_201_CREATED)
@@ -27,9 +31,8 @@ class CreateModelMixin(mixins.CreateModelMixin):
 
 class ListModelMixin(mixins.ListModelMixin):
     """
-    List or cache a queryset.
+    List or cache a queryset with user isolation.
     """
-
     async def alist(self, request, *args, **kwargs):
         cache_key = await CacheUtils.generate_list_key(request)
         if (cached := await cache.aget(cache_key)):
@@ -41,8 +44,7 @@ class ListModelMixin(mixins.ListModelMixin):
         if page is not None:
             paginated_response = await self.get_apaginated_response(data)
             data = paginated_response.data
-            
-        await cache.aset(cache_key, data, timeout=300)
+        await cache.aset(cache_key, data, timeout=lib_settings.TTL_LIST)
         return Response(data, status=status.HTTP_200_OK)
 
 
@@ -53,12 +55,12 @@ class RetrieveModelMixin(mixins.RetrieveModelMixin):
     async def aretrieve(self, request, *args, **kwargs):
         instance = await self.aget_object()
         m_hash = await CacheUtils.get_model_hash(self)
-        cache_key = f"obj:{m_hash}:{instance.pk}"
+        cache_key = f"{lib_settings.PREFIX}:obj:{m_hash}:{instance.pk}"
         if (cached := await cache.aget(cache_key)):
             return Response(cached, status=status.HTTP_200_OK)
         serializer = self.get_serializer(instance)
         data = await serializer.adata
-        await cache.aset(cache_key, data, timeout=600)
+        await cache.aset(cache_key, data, timeout=lib_settings.TTL_OBJECT)
         return Response(data, status=status.HTTP_200_OK)
 
 
@@ -69,7 +71,10 @@ class UpdateModelMixin(mixins.UpdateModelMixin):
     async def aupdate(self, request, *args, **kwargs):
         response = await super().aupdate(request, *args, **kwargs)
         m_hash = await CacheUtils.get_model_hash(self)
-        await cache.aset(f"obj:{m_hash}:{self.kwargs['pk']}", response.data, timeout=600)
+        await cache.aset(
+            f"{lib_settings.PREFIX}:obj:{m_hash}:{self.kwargs['pk']}", 
+            response.data, timeout=lib_settings.TTL_OBJECT
+        )
         if request.user.is_authenticated:
             await CacheUtils.incr_user_version(request.user.id)
         return response
@@ -82,7 +87,7 @@ class DestroyModelMixin(mixins.DestroyModelMixin):
     async def adestroy(self, request, *args, **kwargs):
         m_hash = await CacheUtils.get_model_hash(self)
         response = await super().adestroy(request, *args, **kwargs)
-        await cache.adelete(f"obj:{m_hash}:{self.kwargs['pk']}")
+        await cache.adelete(f"{lib_settings.PREFIX}:obj:{m_hash}:{self.kwargs['pk']}")
         if request.user.is_authenticated:
             await CacheUtils.incr_user_version(request.user.id)
         return response
