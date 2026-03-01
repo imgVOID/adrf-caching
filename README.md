@@ -103,18 +103,15 @@ urlpatterns = [
 ]
 ```
 
-Even though the library uses async methods internally (e.g., alist, acreate), you should use standard DRF action names as keys in your schema decorators. The base classes bridge these names automatically to provide a seamless documentation experience.
+Remember to use regular method names without the 'a' prefix. Actions have a prefix, methods do not.
 
 ```python
-from drf_spectacular.utils import extend_schema, extend_schema_view
+class RetrieveUpdateCustomView(RetrieveUpdateAPIView):
+    queryset = Test.objects.all()
 
-@extend_schema_view(
-    list=extend_schema(summary="List all items"),
-    retrieve=extend_schema(summary="Get item details"),
-)
-class ItemViewSet(ModelViewSetCached):
-    queryset = Item.objects.all()
-    serializer_class = ItemSerializer
+    @extend_schema(summary="Async GET")
+    async def get(self, request, *args, **kwargs):
+        return await super().get(request, *args, **kwargs)
 ```
 
 #### Extra
