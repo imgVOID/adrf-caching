@@ -91,3 +91,41 @@ class DestroyModelMixin(mixins.DestroyModelMixin):
         if request.user.is_authenticated:
             await CacheUtils.incr_user_version(request.user.id)
         return response
+
+
+class CacheInvalidationMixin:
+    """
+    Mixin for ADRF views to automatically invalidate user cache 
+    during update and destroy operations.
+    Use if the object has more than one owner.
+    Please specify owners "id" fields in invalidate_fields.
+    """
+    invalidate_fields = []
+
+    async def _perform_invalidation(self, instance):
+        target_ids = set()
+
+        # 1. Requester ID
+        if self.request.user.is_authenticated:
+            target_ids.add(self.request.user.id)
+
+        # 2. Related user IDs from the instance
+        if instance:
+            for field in self.invalidate_fields:
+                u_id = getattr(instance, field, None)
+                if u_id:
+                    target_ids.add(u_id)
+
+        # 3. Trigger async increment
+        for u_id in target_ids:
+            await CacheUtils.incr_user_version(u_id)
+
+    async def perform_aupdate(self, serializer):
+        # adrf serializers use asave()
+        instance = await serializer.asave()
+        await self._perform_invalidation(instance)
+
+    async def perform_adestroy(self, instance):
+        # Invalidate before deletion to ensure related IDs are accessible
+        await self._perform_invalidation(instance)
+        await instance.adelete()

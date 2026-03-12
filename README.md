@@ -88,6 +88,24 @@ ADRF_CACHING_SETTINGS = {
 }
 ```
 
+### 5. Automated Multi-User Invalidation
+
+In many cases, an update to a resource should invalidate the cache for multiple users associated with that resource. The `CacheInvalidationMixin` automates this process by incrementing the cache version for all relevant parties during update and destroy operations.
+
+Standard caching usually only invalidates the requester's view. This mixin ensures that if `User Type A` modifies a shared resource, `User Type B` (and any others linked to the object) will instantly see the updated data because their specific cache versions are also incremented. That is, if the administrator changes an object, the cache is invalidated for the owners of this object.
+
+```
+from adrf_caching.mixins import CacheInvalidationMixin
+from adrf_caching.generics import RetrieveUpdateDestroyAPIView
+
+class SharedResourceView(CacheInvalidationMixin, RetrieveUpdateDestroyAPIView):
+    queryset = SharedResource.objects.all()
+    serializer_class = SharedResourceSerializer
+    
+    # List the foreign key fields containing User IDs to be invalidated
+    invalidate_fields = ("participant_one_id", "participant_two_id")
+```
+
 ### 📜 OpenAPI Schema & Documentation
 
 ##### The library is optimized for **[drf-spectacular](https://github.com/tfranzel/drf-spectacular)**.
