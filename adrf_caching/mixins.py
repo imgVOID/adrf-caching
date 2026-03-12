@@ -129,3 +129,7 @@ class CacheInvalidationMixin:
         # Invalidate before deletion to ensure related IDs are accessible
         await self._perform_invalidation(instance)
         await instance.adelete()
+
+    async def perform_acreate(self, serializer):
+        instance = await serializer.asave()
+        await self._perform_invalidation(instance)
