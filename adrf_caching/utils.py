@@ -59,14 +59,21 @@ class CacheUtils:
             await cache.aset(cache_key, 2, timeout=lib_settings.TTL_USER_VER)
 
     @classmethod
-    async def generate_list_key(cls, request):
+    async def generate_list_key(cls, request, view=None):
         """Generates a stable, sorted, user-specific cache key for list views."""
-        view = request.parser_context.get('view')
+        view = view or getattr(request, 'parser_context', {}).get('view')
+        if not view:
+            raise AttributeError(
+                "Could not determine 'view' from request. "
+                "Ensure the request is processed by a DRF View or pass 'view' explicitly."
+            )
         model_hash = await cls.get_model_hash(view)
-        query_params = dict(request.query_params.items())
+        params = getattr(request, 'query_params', request.GET)
+        query_params = dict(params.items())
         sorted_params = sorted(query_params.items())
         params_hash = md5(dumps(sorted_params).encode()).hexdigest()
-        user_id = request.user.id if request.user.is_authenticated else "anonymous"
+        user = getattr(request, 'user', None)
+        user_id = user.id if user and user.is_authenticated else "anonymous"
         if user_id != "anonymous":
             version = await cls.get_user_version(user_id)
             return f"list:{model_hash}:{user_id}:v{version}:{params_hash}"

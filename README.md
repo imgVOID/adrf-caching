@@ -158,24 +158,12 @@ class MySerializer(serializers.ModelSerializer):
 ```
 ### 🏃 Running Tests
 
-The library uses Django's `TransactionTestCase` to ensure database integrity during async operations.
+The library uses `pytest` to ensure database integrity during async operations.
 ```
-# Run all tests
-python -m unittest discover tests -p "*_test.py"
-
-# Run a specific test file
-python -m unittest tests/viewsets_test.py
-
-# Run a specific test class
-python -m unittest tests.viewsets_test.TestCacheSystem
-```
-You can use the standard Django test runner:
-```
-# Run all tests
-python manage.py test tests.utils_test tests.viewsets_test tests.generics_test
-
-# Run a specific test class
-python manage.py test tests.viewsets_test.TestCacheSystem
+# Exec command to run all tests from the main dir
+pytest
+# Or as a module
+python -m pytest -v
 ```
 
 ## License
