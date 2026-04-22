@@ -1,6 +1,5 @@
 # adrf-caching
 
-[![PyPI version](https://img.shields.io/pypi/v/adrf-caching.svg)](https://pypi.org/project/adrf-caching/)
 [![Socket Badge](https://badge.socket.dev/pypi/package/adrf-caching/latest)](https://badge.socket.dev/pypi/package/adrf-caching/latest)
 
 A high-performance library that extends **ADRF (Asynchronous Django REST Framework)** with asynchronous Django-based per-user caching.
