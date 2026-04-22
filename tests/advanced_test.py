@@ -2,10 +2,8 @@ import pytest
 import asyncio
 from django.core.exceptions import ImproperlyConfigured
 from django.db import models
-from django.contrib.auth import get_user_model
 from rest_framework.test import APIRequestFactory, force_authenticate
 from adrf.serializers import ModelSerializer
-from django.contrib.auth.models import AnonymousUser
 
 from adrf_caching.viewsets import ModelViewSetCached
 from adrf_caching.utils import cache, lib_settings, CacheUtils
@@ -169,6 +167,7 @@ class TestCachierPro:
 
     async def test_anonymous_shared_cache_stable(self):
         """Anon users should share 'v0' cache and NOT affect each other's versions."""
+        from django.contrib.auth.models import AnonymousUser
         req = self.factory.get('/api/')
         req.user = AnonymousUser()
         
