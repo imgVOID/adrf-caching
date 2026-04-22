@@ -9,23 +9,25 @@ from .utils import cache, CacheUtils, lib_settings
 class CreateModelMixin(mixins.CreateModelMixin):
     """
     Create and cache a model instance.
-    Invalidates user list version.
+    Invalidates user list version and any owners specified in invalidate_fields.
     """
     async def acreate(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         await sync_to_async(serializer.is_valid, thread_sensitive=True)(raise_exception=True)
         await self.perform_acreate(serializer)
         data = await serializer.adata
+        
         m_hash = await CacheUtils.get_model_hash(self)
         id_field = getattr(self.serializer_class, "custom_id", "id")
         obj_pk = data.get(id_field)
+        
         if obj_pk:
             await cache.aset(
                 f"{lib_settings.PREFIX}:obj:{m_hash}:{obj_pk}", 
                 data, timeout=lib_settings.TTL_OBJECT
             )
-        if request.user.is_authenticated:
-            await CacheUtils.incr_user_version(request.user.id)
+            
+        await CacheUtils.invalidate_list_cache(request, self, getattr(serializer, 'instance', None))
         return Response(data, status=status.HTTP_201_CREATED)
 
 
@@ -65,18 +67,18 @@ class RetrieveModelMixin(mixins.RetrieveModelMixin):
 
 
 class UpdateModelMixin(mixins.UpdateModelMixin):
-    """
-    Update and cache a model instance.
-    """
     async def aupdate(self, request, *args, **kwargs):
         response = await super().aupdate(request, *args, **kwargs)
+        
+        instance = await self.aget_object() 
+        
         m_hash = await CacheUtils.get_model_hash(self)
         await cache.aset(
             f"{lib_settings.PREFIX}:obj:{m_hash}:{self.kwargs['pk']}", 
             response.data, timeout=lib_settings.TTL_OBJECT
         )
-        if request.user.is_authenticated:
-            await CacheUtils.incr_user_version(request.user.id)
+        
+        await CacheUtils.invalidate_list_cache(request, self, instance)
         return response
 
 
@@ -85,51 +87,21 @@ class DestroyModelMixin(mixins.DestroyModelMixin):
     Destroy a model instance and clear cache.
     """
     async def adestroy(self, request, *args, **kwargs):
+        # Fetch instance BEFORE deletion to ensure related fields are accessible
+        instance = await self.aget_object()
         m_hash = await CacheUtils.get_model_hash(self)
+        
+        await CacheUtils.invalidate_list_cache(request, self, instance)
+        
         response = await super().adestroy(request, *args, **kwargs)
+        
         await cache.adelete(f"{lib_settings.PREFIX}:obj:{m_hash}:{self.kwargs['pk']}")
-        if request.user.is_authenticated:
-            await CacheUtils.incr_user_version(request.user.id)
         return response
 
 
 class CacheInvalidationMixin:
     """
-    Mixin for ADRF views to automatically invalidate user cache 
-    during update and destroy operations.
-    Use if the object has more than one owner.
-    Please specify owners "id" fields in invalidate_fields.
+    Declarative mixin for ADRF views to specify multiple owners.
+    The list caches for these owners will be invalidated on updates/deletes.
     """
     invalidate_fields = []
-
-    async def _perform_invalidation(self, instance):
-        target_ids = set()
-
-        # 1. Requester ID
-        if self.request.user.is_authenticated:
-            target_ids.add(self.request.user.id)
-
-        # 2. Related user IDs from the instance
-        if instance:
-            for field in self.invalidate_fields:
-                u_id = getattr(instance, field, None)
-                if u_id:
-                    target_ids.add(u_id)
-
-        # 3. Trigger async increment
-        for u_id in target_ids:
-            await CacheUtils.incr_user_version(u_id)
-
-    async def perform_aupdate(self, serializer):
-        # adrf serializers use asave()
-        instance = await serializer.asave()
-        await self._perform_invalidation(instance)
-
-    async def perform_adestroy(self, instance):
-        # Invalidate before deletion to ensure related IDs are accessible
-        await self._perform_invalidation(instance)
-        await instance.adelete()
-
-    async def perform_acreate(self, serializer):
-        instance = await serializer.asave()
-        await self._perform_invalidation(instance)

@@ -1,3 +1,4 @@
+import asyncio
 from hashlib import md5
 from json import dumps
 from django.core.cache import cache
@@ -78,3 +79,30 @@ class CacheUtils:
             version = await cls.get_user_version(user_id)
             return f"list:{model_hash}:{user_id}:v{version}:{params_hash}"
         return f"list:{model_hash}:anon:v0:{params_hash}"
+
+    @staticmethod
+    async def invalidate_list_cache(request, view, instance=None):
+        """Invalidates cache for the request user and any specified owners."""
+        target_ids = set()
+        
+        # 1. Add current user
+        if request and getattr(request, 'user', None) and request.user.is_authenticated:
+            target_ids.add(request.user.id)
+            
+        # 2. Add extra owners if defined in view.invalidate_fields
+        invalidate_fields = getattr(view, 'invalidate_fields', [])
+        if instance and invalidate_fields:
+            for field in invalidate_fields:
+                if not hasattr(instance, field):
+                    raise ImproperlyConfigured(
+                        f"Field '{field}' not found in {instance.__class__.__name__}. "
+                        f"Check your 'invalidate_fields' in the ViewSet."
+                    )
+                u_id = getattr(instance, field, None)
+                if u_id:
+                    target_ids.add(u_id)
+                    
+        # 3. Fire parallel invalidation
+        if target_ids:
+            tasks = [CacheUtils.incr_user_version(u_id) for u_id in target_ids]
+            await asyncio.gather(*tasks)

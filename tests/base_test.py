@@ -1,13 +1,14 @@
 import pytest
 from django.db import models
-from django.contrib.auth.models import User
-from rest_framework import status
+from django.contrib.auth import get_user_model
 from rest_framework.test import APIRequestFactory, force_authenticate
 from adrf.serializers import ModelSerializer
 
 from adrf_caching.viewsets import ModelViewSetCached
 from adrf_caching.utils import cache, lib_settings, CacheUtils
 from adrf_caching.mixins import CacheInvalidationMixin
+
+User = get_user_model()
 
 # --- Test Models & Serializers ---
 
@@ -214,7 +215,6 @@ class TestCacheInvalidationHandlers:
         key_anon_after = await CacheUtils.generate_list_key(request_anon, view=TestViewSet())
         assert key_anon == key_anon_after
 
-
 # --- Multi-Owner Test Infrastructure ---
 
 class MultiOwnerModel(models.Model):
@@ -372,3 +372,4 @@ class TestMultiOwnerFullCycle:
 
         assert await CacheUtils.get_user_version(self.u1.id) > v1
         assert await CacheUtils.get_user_version(self.u3.id) > v3
+

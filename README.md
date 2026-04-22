@@ -1,6 +1,9 @@
 # adrf-caching
 
-A high-performance library that extends **ADRF (Asynchronous Django REST Framework)** with intelligent, per-user async caching. It reduces database load and decreases response times by leveraging asynchronous cache operations and a smart invalidation strategy based on user-specific versioning.
+![PyPI - Version](https://img.shields.io/pypi/v/adrf-caching)
+[![Socket Badge](https://badge.socket.dev/pypi/package/adrf-caching/latest)](https://badge.socket.dev/pypi/package/adrf-caching/latest)
+
+A high-performance library that extends **ADRF (Asynchronous Django REST Framework)** with asynchronous Django-based per-user caching.
 
 ## 🚀 Key Features
 #### Contains asynchronous caching mixins, generics and viewsets for Async Django Rest Framework and Django 5.0+:
@@ -9,7 +12,7 @@ A high-performance library that extends **ADRF (Asynchronous Django REST Framewo
 * **Smart Invalidation (Cache Versioning):** Instead of manually clearing complex cache keys, it uses a versioning system. When a user modifies data, their specific version increments, instantly invalidating outdated lists.
 * **Secure Data Isolation:** Prevents data leakage by incorporating unique user hashes and versions into cache keys.
 * **MD5 Hashing:** Optimized performance using `md5` for compact and consistent cache keys.
-* **OpenAPI Support:** Fully compatible with `drf-spectacular` scheme generator. It includes built-in method bridging to ensure async actions are correctly indexed by the schema inspector.
+* **OpenAPI Support:** Fully compatible with `drf-spectacular` scheme generator.
 
 ## 🛠 Prerequisites
 
