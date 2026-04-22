@@ -45,6 +45,5 @@ jobs:
       env:
         PYTHONPATH: ${{ github.workspace }}
         REDIS_URL: redis://localhost:6379
-        DJANGO_SETTINGS_MODULE: tests.conftest 
       run: |
         pytest
