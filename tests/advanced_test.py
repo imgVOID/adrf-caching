@@ -10,8 +10,6 @@ from django.contrib.auth.models import AnonymousUser
 from adrf_caching.viewsets import ModelViewSetCached
 from adrf_caching.utils import cache, lib_settings, CacheUtils
 
-User = get_user_model()
-
 # --- Mock Models & Serializers ---
 
 class MockModel(models.Model):
@@ -53,9 +51,11 @@ class TestCachierPro:
 
     @pytest.fixture(autouse=True)
     async def setup(self):
+        from django.contrib.auth import get_user_model
+        self.user_model = get_user_model()
         self.factory = APIRequestFactory()
-        self.user = await User.objects.acreate(username="dev_user")
-        self.other_user = await User.objects.acreate(username="other_user")
+        self.user = await self.user_model.objects.acreate(username="dev_user")
+        self.other_user = await self.user_model.objects.acreate(username="other_user")
         self.view_list = MockViewSet.as_view({'get': 'alist', 'post': 'acreate'})
         self.view_detail = MockViewSet.as_view({
             'get': 'aretrieve', 

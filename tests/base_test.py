@@ -8,8 +8,6 @@ from adrf_caching.viewsets import ModelViewSetCached
 from adrf_caching.utils import cache, lib_settings, CacheUtils
 from adrf_caching.mixins import CacheInvalidationMixin
 
-User = get_user_model()
-
 # --- Test Models & Serializers ---
 
 class TestModel(models.Model):
@@ -54,10 +52,10 @@ class TestCacheInvalidationHandlers:
 
     @pytest.fixture(autouse=True)
     async def setup_test(self):
-        self.factory = APIRequestFactory()
         from django.contrib.auth import get_user_model
-        User = get_user_model()
-        self.user, _ = await User.objects.aget_or_create(username="cleaner")
+        self.user_model = get_user_model()
+        self.factory = APIRequestFactory()
+        self.user, _ = await self.user_model.objects.aget_or_create(username="cleaner")
         
         # Initialize view methods
         self.view_list = TestViewSet.as_view({'get': 'alist', 'post': 'acreate'})
@@ -259,9 +257,11 @@ class TestMultiOwnerInvalidation:
 
     @pytest.fixture(autouse=True)
     async def setup(self):
+        from django.contrib.auth import get_user_model
+        self.user_model = get_user_model()
         self.factory = APIRequestFactory()
-        self.user1, _ = await User.objects.aget_or_create(username="user1")
-        self.user2, _ = await User.objects.aget_or_create(username="user2")
+        self.user1, _ = await self.user_model.objects.aget_or_create(username="user1")
+        self.user2, _ = await self.user_model.objects.aget_or_create(username="user2")
         await cache.aclear()
 
     async def test_create_invalidates_multiple_users(self):
@@ -308,10 +308,12 @@ class TestMultiOwnerFullCycle:
 
     @pytest.fixture(autouse=True)
     async def setup(self):
+        from django.contrib.auth.models import User
+        self.user_model = User
         self.factory = APIRequestFactory()
-        self.u1, _ = await User.objects.aget_or_create(username="u1")
-        self.u2, _ = await User.objects.aget_or_create(username="u2")
-        self.u3, _ = await User.objects.aget_or_create(username="u3")
+        self.u1, _ = await self.user_model.objects.aget_or_create(username="u1")
+        self.u2, _ = await self.user_model.objects.aget_or_create(username="u2")
+        self.u3, _ = await self.user_model.objects.aget_or_create(username="u3")
         
         self.view_list = MultiOwnerViewSet.as_view({'post': 'acreate'})
         self.view_detail = MultiOwnerViewSet.as_view({
